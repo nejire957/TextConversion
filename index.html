@@ -3,7 +3,7 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>文章変換ツール</title>
+    <title>(簡易)文脈変換ツール</title>
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -11,66 +11,144 @@
     <style>
         body{
             background-color: pink;
+            padding: 0px;
+        }
+        h1{
+            margin:10px;
         }
         div{
             display: inline-block;
-            margin: 5px;
-            padding: 5px;
+            width: 320px;
+            margin: 10px;
+            padding: 10px;
             vertical-align: top;
             background-color: white;
         }
+        .targetDiv{
+            width: 310px;
+            flex-wrap: wrap;
+            margin: 0px;
+            padding: 0px;
+        }
         p{
-            margin-top: 5px;
-            margin-bottom: 5px;
+            display: block;
+            margin:0px;
         }
         textarea{
+            display: block;
             resize:none;
-            width: 320px;
-            height:100px
+            width: 310px;
+            height:100px;
+            margin-top:5px;
+            margin-bottom:5px;
+            font-size: medium;
         }
-        .shortText{
+        #selected{
+            display: inline-block;
+            width: 310px;
+            margin-top:5px;
+            margin-bottom:5px;
+            font-size: medium;
+        }
+        #prefix,#suffix{
+            display: inline-block;
+            width:155px;
+            margin-top:5px;
+            margin-bottom:5px;
+            margin-right:5px;
+            font-size: medium;
+        }
+        #prefixCounter,#suffixCounter,#count{
+            display: inline-block;
             width:40px;
+            margin-top:5px;
+            margin-bottom:5px;
+            font-size: medium;
+        }
+        #regExp{
+            display: inline-block;
+            width: 255px;
+            margin-top:5px;
+            margin-bottom:5px;
+            margin-right:5px;
+            font-size: medium;
+        }
+        #add,#remove{
+            display: inline-block;
+            margin-top:5px;
+            margin-bottom:5px;
+            margin-right:5px;
+            font-size: medium;
+            width: 30px;
+            height: 30px;
+            vertical-align: top;
+        }
+        table{
+            border-spacing: 0;
+            margin-top:5px;
+            margin-bottom:5px;
+            margin-right:5px;
+        }
+        th{
+            text-align: left;
+            border:1px solid gray;
+            background-color: gainsboro;
+        }
+        td{
+            text-align: left;
+            border:1px solid gray;
+            padding: 0px;
+        }
+        .variableCell{
+            width:40px;
+        }
+        .regExpCell{
+            width: 280px;
+        }
+        .regExpCellEdit{
+            width: 99%;
+            height:28px;
+            margin:0px;
+            font-size: medium;
+        }
+        #conversionButton{
+            display: inline-block;
+            margin-top:5px;
+            margin-bottom:5px;
+            margin-right:5px;
+            font-size: medium;
+            height: 30px;
+            vertical-align: top;
         }
     </style>
     </head>
     <body onload="Initialize();">
         <main>
-            <h1>文章変換ツール</h1>
-            <div id="targetDiv">
-                <p>(1) 対象</p>
-                <textarea id="target" wrap="off" onmouseup="Extract();"></textarea>
-                <p>
-                    選択範囲：<input id="selected" type="text">
-                </p>
-                <p>
-                    選択された文字数：<input id="count" class="shortText" type="text">
-                </p>
-                <p>
-                    直前：<input id="prefix" class="shortText" type="text">
-                    文字数：<input id="prefixCounter" class="shortText" type="number" min="1" oninput="Extract();">
-                </p>
-                <p>
-                    直後：<input id="suffix" class="shortText" type="text">
-                    文字数：<input id="suffixCounter" class="shortText" type="number" min="1" oninput="Extract();">
-                </p>
-                <p>
-                    正規表現：<input id="regExp" type="text">
-                </p>
-                <p>抽出された類似部分</p>
-                <textarea id="equivalent"></textarea>
-                <p>
-                    置換文字：<input id="variable" class="shortText" type="text">
-                </p>
+            <h1>(簡易)文脈変換ツール</h1>
+            <div id="targetsDiv">
+                <p>(1) 文脈抽出</p>
+                <textarea id="target" wrap="off" placeholder="変換対象" onmouseup="Extract();"></textarea>
+                <input id="selected" type="text" placeholder="選択内容">
+                <input id="prefix" type="text" placeholder="直前">
+                <input id="prefixCounter" type="number" min="1" oninput="Extract();">
+                <input id="suffix" type="text" placeholder="直後">
+                <input id="suffixCounter" type="number" min="1" oninput="Extract();">
+                <input id="regExp" type="text" placeholder="正規表現">
+                <input id="count" type="text" placeholder="件数">
+                <textarea id="equivalent" placeholder="抽出された類似部分"></textarea>
+                <input id="add" type="button" value="+" onclick="Add();">
+                <input id="remove" type="button" value="-" onclick="Remove();">
+                <table id="table">
+                    <tr><th class="variableCell">変数</th><th class="regExpCell">正規表現</th></tr>
+                </table>
             </div>
             <div id="conversionDiv">
                 <p>(2) テンプレート</p>
                 <textarea id="template" wrap="off"></textarea>
-                <p>
-                    <input type="button" value="変換" onclick="Conversion();">
-                </p>
+                <input id="conversionButton" type="button" value="変換" onclick="Conversion();">
             </div>
             <div id="resultDiv">
-                <p>(3) 結果</p>
+                <p>(3) 変換結果</p>
                 <textarea id="result" wrap="off"></textarea>
             </div>
         </main>
@@ -90,12 +168,30 @@
                 $('#result').val("");
             }
             function Conversion(){
+                var resultText = "";
                 var equivalents = $('#equivalent').val().split("\n");
                 var template = $('#template').val();
-                var variable = $('#variable').val();
-                var resultText = "";
-                for(var i=0;i<equivalents.length;i++){
-                    resultText = resultText + template.replace(variable,equivalents[i]) + "\n";
+                var variableArray = [];
+                var replaceTable = [];
+                $('.regExpCell').each(function(index,element){
+                    if(index == 0) {
+                        return true;
+                    } else {
+                        var variable = $(element).prev().text();
+                        variableArray.push(variable);
+                        var regExp = $(element).text();
+                        var matchArray = $('#target').val().match(new RegExp(regExp,'g'));
+                        replaceTable.push(matchArray);
+                    }
+                });
+                replaceTable = replaceTable[0].map((_,c) => replaceTable.map(r => r[c]));
+                for(var i=0;i<replaceTable.length;i++){
+                    var replaceText = template;
+                    for(var j=0;j<replaceTable[i].length;j++){
+                        var temp = replaceTable[i][j];
+                        replaceText = replaceText.replace(new RegExp(Escape(variableArray[j]),'g'),replaceTable[i][j]);
+                    }
+                    resultText = resultText + replaceText + "\n";
                 }
                 resultText = resultText.replace(/\n$/,"");
                 $('#result').val(resultText);
@@ -109,24 +205,24 @@
                 var prefixStart = start - Number($('#prefixCounter').val());
                 var suffixEnd = end + Number($('#suffixCounter').val());
                 $('#selected').val(selected);
-                $('#count').val(selected.length);
                 if(prefixStart < 0){
-                    var prefix = "^";
+                    var prefix = "^|\\n";
                 } else {
-                    var prefix = text.slice(prefixStart, start);
+                    var prefix = Escape(text.slice(prefixStart, start));
                 }
                 $('#prefix').val(prefix);
                 if(text.length < suffixEnd){
-                    var suffix = "$";
+                    var suffix = "$|\\n";
                 } else {
-                    var suffix = text.slice(end, suffixEnd);
+                    var suffix = Escape(text.slice(end, suffixEnd));
                 }
                 $('#suffix').val(suffix);
-                var regExp = "(?<=" + Escape(prefix) + ")(.*)(?=" + Escape(suffix) + ")";
+                var regExp = "(?<=" + prefix + ")(.+)(?=" + suffix + ")";
                 $('#regExp').val(regExp);
                 var matchArray = text.match(new RegExp(regExp,'g'));
                 var matchText = "";
                 if(matchArray != null){
+                    $('#count').val(matchArray.length);
                     for(var i=0;i<matchArray.length;i++){
                         matchText = matchText + matchArray[i] + "\n";
                     }
@@ -150,7 +246,29 @@
                 text = text.replace(/\$/g, "\\$");
                 text = text.replace(/\-/g, "\\-");
                 text = text.replace(/\|/g, "\\|");
+                text = text.replace(/\n/g, "\\n");
                 return text;
+            }
+            function Add(){
+                if($('#regExp').val() == "") return false;
+                var rowCount = $('tr').length;
+                $row = $('<tr></tr>');
+                $variableCell = $("<td></td>", {
+                    "class": "variableCell"
+                });
+                $variableCell.text("{"+String(rowCount)+"}");
+                $variableCell.appendTo($row);
+                $regExpCell = $("<td></td>", {
+                    "class": "regExpCell"
+                });
+                $regExpCell.text($('#regExp').val());
+                $regExpCell.appendTo($row);
+                $row.appendTo($('#table'));
+            }
+            function Remove(){
+                if(1 < $('tr').length){
+                    $('#table tr:last-child').remove();
+                }
             }
         </script>
     </body>
