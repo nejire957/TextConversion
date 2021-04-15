@@ -2,22 +2,47 @@
 <html>
     <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>TextConversion</title>
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
         crossorigin="anonymous"></script>
+    <style>
+        div{
+            display: inline-block;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        p{
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        textarea{
+            resize:none;
+            width: 340px;
+            height:200px
+        }
+    </style>
     </head>
     <body>
         <main>
-            <h1>TextConcersion</h1>
-            <p id="target">Target</p>
-            <input type="button" value="Conversion" onclick="Conversion();">
-            <p id="result">Result</p>
+            <h1>TextConversion</h1>
+            <div>
+                <p>Target</p>
+                <textarea id="target"></textarea>
+            </div>
+            <div>
+                <input type="button" value="Conversion" onclick="Conversion();">
+            </div>
+            <div>
+                <p>Result</p>
+                <textarea id="result"></textarea>
+            </div>
         </main>
         <script>
            function Conversion(event){
-                $('#result').text("Done");
+                $('#result').val($('#target').val());
            }
         </script>
     </body>
