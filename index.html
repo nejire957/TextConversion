@@ -3,16 +3,21 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>TextConversion</title>
+    <title>文章変換ツール</title>
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
         crossorigin="anonymous"></script>
     <style>
+        body{
+            background-color: pink;
+        }
         div{
             display: inline-block;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            margin: 5px;
+            padding: 5px;
+            vertical-align: top;
+            background-color: white;
         }
         p{
             margin-top: 5px;
@@ -20,30 +25,133 @@
         }
         textarea{
             resize:none;
-            width: 340px;
-            height:200px
+            width: 320px;
+            height:100px
+        }
+        .shortText{
+            width:40px;
         }
     </style>
     </head>
-    <body>
+    <body onload="Initialize();">
         <main>
-            <h1>TextConversion</h1>
-            <div>
-                <p>Target</p>
-                <textarea id="target"></textarea>
+            <h1>文章変換ツール</h1>
+            <div id="targetDiv">
+                <p>(1) 対象</p>
+                <textarea id="target" wrap="off" onmouseup="Extract();"></textarea>
+                <p>
+                    選択範囲：<input id="selected" type="text">
+                </p>
+                <p>
+                    選択された文字数：<input id="count" class="shortText" type="text">
+                </p>
+                <p>
+                    直前：<input id="prefix" class="shortText" type="text">
+                    文字数：<input id="prefixCounter" class="shortText" type="number" min="1" oninput="Extract();">
+                </p>
+                <p>
+                    直後：<input id="suffix" class="shortText" type="text">
+                    文字数：<input id="suffixCounter" class="shortText" type="number" min="1" oninput="Extract();">
+                </p>
+                <p>
+                    正規表現：<input id="regExp" type="text">
+                </p>
+                <p>抽出された類似部分</p>
+                <textarea id="equivalent"></textarea>
+                <p>
+                    置換文字：<input id="variable" class="shortText" type="text">
+                </p>
             </div>
-            <div>
-                <input type="button" value="Conversion" onclick="Conversion();">
+            <div id="conversionDiv">
+                <p>(2) テンプレート</p>
+                <textarea id="template" wrap="off"></textarea>
+                <p>
+                    <input type="button" value="変換" onclick="Conversion();">
+                </p>
             </div>
-            <div>
-                <p>Result</p>
-                <textarea id="result"></textarea>
+            <div id="resultDiv">
+                <p>(3) 結果</p>
+                <textarea id="result" wrap="off"></textarea>
             </div>
         </main>
         <script>
-           function Conversion(event){
-                $('#result').val($('#target').val());
-           }
+            function Initialize(){
+                $('#target').val("");
+                $('#selected').val("");
+                $('#count').val("");
+                $('#prefix').val("");
+                $('#suffix').val("");
+                $('#prefixCounter').val("1");
+                $('#suffixCounter').val("1");
+                $('#regExp').val("");
+                $('#equivalent').val("");
+                $('#variable').val("{1}");
+                $('#template').val("");
+                $('#result').val("");
+            }
+            function Conversion(){
+                var equivalents = $('#equivalent').val().split("\n");
+                var template = $('#template').val();
+                var variable = $('#variable').val();
+                var resultText = "";
+                for(var i=0;i<equivalents.length;i++){
+                    resultText = resultText + template.replace(variable,equivalents[i]) + "\n";
+                }
+                resultText = resultText.replace(/\n$/,"");
+                $('#result').val(resultText);
+            }
+            function Extract(){
+                var obj = $('#target').get(0);
+                var text = $('#target').val();
+                var start = obj.selectionStart;
+                var end = obj.selectionEnd;
+                var selected = text.slice(start,end);
+                var prefixStart = start - Number($('#prefixCounter').val());
+                var suffixEnd = end + Number($('#suffixCounter').val());
+                $('#selected').val(selected);
+                $('#count').val(selected.length);
+                if(prefixStart < 0){
+                    var prefix = "^";
+                } else {
+                    var prefix = text.slice(prefixStart, start);
+                }
+                $('#prefix').val(prefix);
+                if(text.length < suffixEnd){
+                    var suffix = "$";
+                } else {
+                    var suffix = text.slice(end, suffixEnd);
+                }
+                $('#suffix').val(suffix);
+                var regExp = "(?<=" + Escape(prefix) + ")(.*)(?=" + Escape(suffix) + ")";
+                $('#regExp').val(regExp);
+                var matchArray = text.match(new RegExp(regExp,'g'));
+                var matchText = "";
+                if(matchArray != null){
+                    for(var i=0;i<matchArray.length;i++){
+                        matchText = matchText + matchArray[i] + "\n";
+                    }
+                    matchText = matchText.replace(/\n$/,"");
+                }
+                $('#equivalent').val(matchText);
+            }
+            function Escape(text){
+                text = text.replace(/\\/g, "\\\\");
+                text = text.replace(/\?/g, "\\?");
+                text = text.replace(/\*/g, "\\*");
+                text = text.replace(/\+/g, "\\+");
+                text = text.replace(/\./g, "\\.");
+                text = text.replace(/\{/g, "\\{");
+                text = text.replace(/\}/g, "\\}");
+                text = text.replace(/\(/g, "\\(");
+                text = text.replace(/\)/g, "\\)");
+                text = text.replace(/\[/g, "\\[");
+                text = text.replace(/\]/g, "\\]");
+                text = text.replace(/\^/g, "\\^");
+                text = text.replace(/\$/g, "\\$");
+                text = text.replace(/\-/g, "\\-");
+                text = text.replace(/\|/g, "\\|");
+                return text;
+            }
         </script>
     </body>
 </html>
