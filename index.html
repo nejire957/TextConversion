@@ -3,7 +3,7 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>(簡易)文脈変換ツール</title>
+    <title>(簡易)文脈を使った文章変換</title>
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -103,7 +103,10 @@
             width:40px;
         }
         .regExpCell{
-            width: 280px;
+            width: 240px;
+        }
+        .countCell{
+            width: 40px;
         }
         .regExpCellEdit{
             width: 99%;
@@ -124,32 +127,32 @@
     </head>
     <body onload="Initialize();">
         <main>
-            <h1>(簡易)文脈変換ツール</h1>
-            <div id="targetsDiv">
-                <p>(1) 文脈抽出</p>
+            <h1>(簡易)文脈を使った文章変換</h1>
+            <div id="targetDiv">
+                <p>(1) 変換対象の入力</p>
                 <textarea id="target" wrap="off" placeholder="変換対象" onmouseup="Extract();"></textarea>
+            </div>
+            <div>
+                <p>(2) 文脈を使った単語抽出</p>
                 <input id="selected" type="text" placeholder="選択内容">
                 <input id="prefix" type="text" placeholder="直前">
                 <input id="prefixCounter" type="number" min="1" oninput="Extract();">
                 <input id="suffix" type="text" placeholder="直後">
                 <input id="suffixCounter" type="number" min="1" oninput="Extract();">
-                <input id="regExp" type="text" placeholder="正規表現">
+                <input id="regExp" type="text" placeholder="正規表現" oninput="Match();">
                 <input id="count" type="text" placeholder="件数">
-                <textarea id="equivalent" placeholder="抽出された類似部分"></textarea>
+                <textarea id="equivalent" placeholder="抽出された部分"></textarea>
                 <input id="add" type="button" value="+" onclick="Add();">
                 <input id="remove" type="button" value="-" onclick="Remove();">
                 <table id="table">
-                    <tr><th class="variableCell">変数</th><th class="regExpCell">正規表現</th></tr>
+                    <tr><th class="variableCell">変数</th><th class="regExpCell">正規表現</th><th class="countCell">件数</th></tr>
                 </table>
             </div>
             <div id="conversionDiv">
-                <p>(2) テンプレート</p>
-                <textarea id="template" wrap="off"></textarea>
+                <p>(3) テンプレートを使った文章変換</p>
+                <textarea id="template" wrap="off" placeholder="テンプレート"></textarea>
                 <input id="conversionButton" type="button" value="変換" onclick="Conversion();">
-            </div>
-            <div id="resultDiv">
-                <p>(3) 変換結果</p>
-                <textarea id="result" wrap="off"></textarea>
+                <textarea id="result" wrap="off" placeholder="変換結果"></textarea>
             </div>
         </main>
         <script>
@@ -209,17 +212,27 @@
                     var prefix = "^|\\n";
                 } else {
                     var prefix = Escape(text.slice(prefixStart, start));
+                    if(prefix.match(/\\n/g)){
+                        prefix = "^|\\n";
+                    }
                 }
                 $('#prefix').val(prefix);
                 if(text.length < suffixEnd){
                     var suffix = "$|\\n";
                 } else {
                     var suffix = Escape(text.slice(end, suffixEnd));
+                    if(suffix.match(/\\n/g)){
+                        suffix = "$|\\n";
+                    }
                 }
                 $('#suffix').val(suffix);
                 var regExp = "(?<=" + prefix + ")(.+)(?=" + suffix + ")";
                 $('#regExp').val(regExp);
-                var matchArray = text.match(new RegExp(regExp,'g'));
+                Match();
+            }
+            function Match(){
+                var regExp = $('#regExp').val();
+                var matchArray = $('#target').val().match(new RegExp(regExp,'g'));
                 var matchText = "";
                 if(matchArray != null){
                     $('#count').val(matchArray.length);
@@ -252,17 +265,22 @@
             function Add(){
                 if($('#regExp').val() == "") return false;
                 var rowCount = $('tr').length;
-                $row = $('<tr></tr>');
-                $variableCell = $("<td></td>", {
+                var $row = $('<tr></tr>');
+                var $variableCell = $("<td></td>", {
                     "class": "variableCell"
                 });
                 $variableCell.text("{"+String(rowCount)+"}");
                 $variableCell.appendTo($row);
-                $regExpCell = $("<td></td>", {
+                var $regExpCell = $("<td></td>", {
                     "class": "regExpCell"
                 });
                 $regExpCell.text($('#regExp').val());
                 $regExpCell.appendTo($row);
+                var $countCell = $("<td></td>",{
+                    "class": "countCell"
+                })
+                $countCell.text($('#count').val());
+                $countCell.appendTo($row);
                 $row.appendTo($('#table'));
             }
             function Remove(){
