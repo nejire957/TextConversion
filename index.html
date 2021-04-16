@@ -95,21 +95,22 @@
             text-align: left;
             border:1px solid gray;
             padding: 0px;
+            max-width: 240px;
         }
         .variableCell{
             width:40px;
+            min-width:40px;
         }
         .regExpCell{
-            width: 240px;
+            width: 210px;
+            max-width: 210px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
         .countCell{
             width: 40px;
-        }
-        .regExpCellEdit{
-            width: 99%;
-            height:28px;
-            margin:0px;
-            font-size: medium;
+            min-width:40px;
         }
         #conversionButton{
             display: inline-block;
