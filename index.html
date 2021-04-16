@@ -3,7 +3,7 @@
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>(簡易)文脈を使った文章変換</title>
+    <title>文脈を使った文章変換</title>
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -18,17 +18,11 @@
         }
         div{
             display: inline-block;
-            width: 320px;
+            width: 310px;
             margin: 10px;
             padding: 10px;
             vertical-align: top;
             background-color: white;
-        }
-        .targetDiv{
-            width: 310px;
-            flex-wrap: wrap;
-            margin: 0px;
-            padding: 0px;
         }
         p{
             display: block;
@@ -37,15 +31,18 @@
         textarea{
             display: block;
             resize:none;
-            width: 310px;
+            width: 300px;
             height:100px;
             margin-top:5px;
             margin-bottom:5px;
             font-size: medium;
         }
+        #target{
+            height:310px;
+        }
         #selected{
             display: inline-block;
-            width: 310px;
+            width: 300px;
             margin-top:5px;
             margin-bottom:5px;
             font-size: medium;
@@ -67,7 +64,7 @@
         }
         #regExp{
             display: inline-block;
-            width: 255px;
+            width: 245px;
             margin-top:5px;
             margin-bottom:5px;
             margin-right:5px;
@@ -123,11 +120,17 @@
             height: 30px;
             vertical-align: top;
         }
+        #template{
+            height: 70px;
+        }
+        #result{
+            height: 185px;
+        }
     </style>
     </head>
     <body onload="Initialize();">
         <main>
-            <h1>(簡易)文脈を使った文章変換</h1>
+            <h1>文脈を使った文章変換</h1>
             <div id="targetDiv">
                 <p>(1) 変換対象の入力</p>
                 <textarea id="target" wrap="off" placeholder="変換対象" onmouseup="Extract();"></textarea>
